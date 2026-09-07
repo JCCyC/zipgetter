@@ -24,7 +24,8 @@ from bs4 import BeautifulSoup
 EXIT_PAGE_INACCESSIBLE = 1
 EXIT_SYNTAX_ERROR = 2
 EXIT_DOWNLOAD_ERROR = 3
-EXIT_OTHER_ERROR = 4
+EXIT_CHROME_NOT_FOUND = 4
+EXIT_OTHER_ERROR = 254
 
 # Masquerade as Chrome on both the page fetch and file downloads, since some
 # servers block or alter behavior for the default requests/urllib user agent.
@@ -38,15 +39,27 @@ CHROME_USER_AGENT = (
 POPULAR_ARCHIVE_EXTENSIONS = ["zip", "rar", "7z", "tar", "tar.gz", "tgz", "tar.bz2", "tar.xz", "gz", "bz2", "xz"]
 
 
-def find_chrome_binary() -> str:
+def find_chrome_binary(override: str | None = None) -> str:
     """Search the PATH for a Chromium, Brave, or Chrome binary.
+
+    Args:
+        override: If given, use this path instead of searching PATH. Must
+            point to an existing, executable file.
 
     Returns:
         The path to the browser binary.
 
     Raises:
-        FileNotFoundError: If none of Chromium, Brave, or Chrome is found on PATH.
+        FileNotFoundError: If override is given but not an executable file,
+            or if none of Chromium, Brave, or Chrome is found on PATH.
     """
+    if override is not None:
+        if not os.path.isfile(override) or not os.access(override, os.X_OK):
+            raise FileNotFoundError(
+                f"Chrome binary not found or not executable: {override!r}"
+            )
+        return override
+
     for name in (
         "chromium",
         "chromium-browser",
@@ -78,13 +91,19 @@ def get_page_html_requests(url: str) -> tuple[str, dict[str, str], dict[str, str
     return response.text, dict(response.request.headers), dict(response.headers), response.status_code
 
 
-def get_page_html_selenium(url: str) -> str:
-    """Fetch a page's HTML using a headless Selenium-driven browser."""
+def get_page_html_selenium(url: str, chrome_binary: str | None = None) -> str:
+    """Fetch a page's HTML using a headless Selenium-driven browser.
+
+    Args:
+        url: The page URL to load.
+        chrome_binary: Path to a Chrome/Chromium/Brave executable to use
+            instead of searching PATH.
+    """
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
 
     options = Options()
-    options.binary_location = find_chrome_binary()
+    options.binary_location = find_chrome_binary(chrome_binary)
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -146,6 +165,13 @@ def main() -> int:
         help="Use Selenium (headless Chromium/Brave/Chrome) instead of a plain HTTP request.",
     )
     parser.add_argument(
+        "-c",
+        dest="chrome_binary",
+        metavar="PATH",
+        help="Path to a Chrome/Chromium/Brave/etc. executable to use with -s, "
+        "if not found on PATH.",
+    )
+    parser.add_argument(
         "-os",
         dest="html_out",
         metavar="FILE",
@@ -180,6 +206,9 @@ def main() -> int:
     if args.headers_out and args.s:
         parser.error("-oh is not available together with -s (Selenium exposes no raw HTTP headers).")
 
+    if args.chrome_binary and not args.s:
+        parser.error("-c is only used together with -s.")
+
     parsed = urlparse(args.url)
     if parsed.scheme not in ("http", "https"):
         print(f"Error: URL must use http or https scheme, got: {args.url!r}", file=sys.stderr)
@@ -190,12 +219,14 @@ def main() -> int:
     status_code = None
     try:
         if args.s:
-            html = get_page_html_selenium(args.url)
+            html = get_page_html_selenium(args.url, args.chrome_binary)
         else:
             html, request_headers, response_headers, status_code = get_page_html_requests(args.url)
     except FileNotFoundError as exc:
+        # Only raised by find_chrome_binary (via get_page_html_selenium):
+        # no usable Chrome/Chromium/Brave binary was found or given.
         print(f"Error: {exc}", file=sys.stderr)
-        return EXIT_OTHER_ERROR
+        return EXIT_CHROME_NOT_FOUND
     except requests.RequestException as exc:
         # A connection-level failure (DNS, refused connection, timeout, ...):
         # no HTTP response was ever received, so there's nothing to save.
