@@ -1,0 +1,68 @@
+# zipgetter
+
+Download all `.zip` files (or other archive types) linked from a web page.
+
+By default the page is fetched with `requests` and parsed with
+`BeautifulSoup`. Pages that build their links via JavaScript can instead be
+rendered with a headless, Selenium-driven browser.
+
+## Requirements
+
+- Python 3.10+
+- The packages in `requirements.txt`
+- For `-s` (Selenium mode) only: a Chromium, Brave, or Google Chrome binary
+  on `PATH`
+
+## Installation
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+## Usage
+
+```bash
+python3 zipgetter.py <url> [options]
+```
+
+Matching archive files are downloaded into the current directory.
+
+### Options
+
+| Flag | Description |
+| --- | --- |
+| `-s` | Use Selenium (headless Chromium/Brave/Chrome) instead of a plain HTTP request. |
+| `-os FILE` | Save the fetched page's HTML source to `FILE`. |
+| `-oh FILE` | Save the request/response HTTP headers to `FILE`. Not available with `-s`. |
+| `-e [EXT1,EXT2,...]` | Also match other archive extensions. With no list given, matches common archive extensions (zip, rar, 7z, tar, tar.gz, tgz, tar.bz2, tar.xz, gz, bz2, xz). Default (no `-e`): `.zip` only. |
+
+### Examples
+
+```bash
+# Download all .zip files linked from a page
+python3 zipgetter.py https://example.com/downloads
+
+# Same, but render the page with headless Chrome first (for JS-built link lists)
+python3 zipgetter.py -s https://example.com/downloads
+
+# Match zip, rar, and tar.gz files
+python3 zipgetter.py -e zip,rar,tar.gz https://example.com/downloads
+
+# Match all common archive extensions
+python3 zipgetter.py -e https://example.com/downloads
+
+# Also save the fetched HTML and headers for debugging
+python3 zipgetter.py -os page.html -oh headers.txt https://example.com/downloads
+```
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Success, all matching files downloaded. |
+| `1` | The page could not be fetched (network error or HTTP 4xx/5xx). |
+| `2` | Command-line usage error. |
+| `3` | The page was fetched, but one or more files failed to download. |
+| `4` | Any other unexpected error (e.g. no Chrome-family browser found for `-s`). |
