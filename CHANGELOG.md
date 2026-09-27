@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-09-27
+
 ### Added
 
 - Debian packaging (`debian/`) and `scripts/build-deb`, to build a `.deb` or a source package for an Ubuntu PPA. The package includes a man page.
@@ -31,5 +33,6 @@ First release.
 - File sizes in the "Downloading" messages and the total download size in the final stats, when the server provides them.
 - Distinct exit codes for an unreachable page, usage errors, failed downloads and a missing Chrome binary.
 
-[Unreleased]: https://github.com/JCCyC/zipgetter/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/JCCyC/zipgetter/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/JCCyC/zipgetter/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/JCCyC/zipgetter/releases/tag/v0.9.0

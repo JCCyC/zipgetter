@@ -1,5 +1,6 @@
-zipgetter (0.9.1-1) UNRELEASED; urgency=medium
+zipgetter (0.9.1-1) jammy; urgency=medium
 
-  * Initial Debian packaging.
+  * Initial Debian packaging, including a man page.
+  * The script is now named zipgetter instead of zipgetter.py.
 
- -- Juan Carlos Castro y Castro <jccyc1965@gmail.com>  Sun, 27 Sep 2026 07:38:30 -0300
+ -- Juan Carlos Castro y Castro <jccyc1965@gmail.com>  Sun, 27 Sep 2026 08:01:05 -0300
