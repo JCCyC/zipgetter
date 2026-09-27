@@ -150,12 +150,17 @@ def stdout_is_terminal() -> bool:
 
 
 def format_size(num_bytes: float) -> str:
-    """Format a byte count as a short human-readable string, e.g. '12.3 MiB'."""
-    for unit in ("B", "KiB", "MiB", "GiB"):
-        if num_bytes < 1024 or unit == "GiB":
-            return f"{num_bytes:.0f} {unit}" if unit == "B" else f"{num_bytes:.1f} {unit}"
+    """Format a byte count with at most 3 significant digits, e.g. '12.3 MiB'."""
+    for unit in ("B", "KiB", "MiB", "GiB", "TiB"):
+        # Switch units before rounding would produce 4 digits (e.g. '1000 KiB').
+        if num_bytes < 999.5 or unit == "TiB":
+            break
         num_bytes /= 1024
-    return f"{num_bytes:.1f} GiB"
+    if unit == "B" or num_bytes >= 99.95:
+        return f"{num_bytes:.0f} {unit}"
+    if num_bytes >= 9.995:
+        return f"{num_bytes:.1f} {unit}"
+    return f"{num_bytes:.2f} {unit}"
 
 
 class ProgressBar:
@@ -237,10 +242,12 @@ def download_file(
     url: str,
     dest_dir: str = ".",
     progress: Callable[..., None] | None = None,
+    on_start: Callable[[int | None], None] | None = None,
 ) -> str:
     """Download a file to dest_dir, returning the local file path.
 
-    If given, progress is called as progress(bytes_done, total_bytes) after
+    If given, on_start is called as on_start(total_bytes) once the response
+    headers arrive, before the body is downloaded. If given, progress is called as progress(bytes_done, total_bytes) after
     each chunk, and once more with force=True at the end; total_bytes is None
     when the size isn't known up front.
     """
@@ -256,6 +263,8 @@ def download_file(
             total = int(response.headers["Content-Length"])
         except (KeyError, ValueError):
             pass
+    if on_start:
+        on_start(total)
     done = 0
     with open(dest_path, "wb") as f:
         for chunk in response.iter_content(chunk_size=65536):
@@ -402,12 +411,26 @@ def main() -> int:
     errors = []
     try:
         for archive_url in archive_urls:
-            log(f"Downloading {archive_url} ...")
+            announced = False
+
+            def announce(total: int | None, archive_url: str = archive_url) -> None:
+                nonlocal announced
+                size = f" ({format_size(total)})" if total is not None else ""
+                log(f"Downloading {archive_url}{size} ...")
+                announced = True
+
             try:
                 dest_path = download_file(
-                    archive_url, args.output_dir, progress=bar.file_progress if bar else None
+                    archive_url,
+                    args.output_dir,
+                    progress=bar.file_progress if bar else None,
+                    on_start=announce,
                 )
             except OSError as exc:
+                # Failed before the response headers arrived (e.g. connection
+                # error or HTTP error status): announce without a size.
+                if not announced:
+                    announce(None)
                 if bar:
                     bar.file_finished()
                 log(f"  Error downloading {archive_url}: {exc}", file=sys.stderr)
