@@ -286,6 +286,14 @@ def main() -> int:
         "if not found on PATH.",
     )
     parser.add_argument(
+        "-O",
+        dest="output_dir",
+        metavar="DIRECTORY",
+        default=".",
+        help="Download files into DIRECTORY, which must already exist. "
+        "Default: the current directory.",
+    )
+    parser.add_argument(
         "-os",
         dest="html_out",
         metavar="FILE",
@@ -322,6 +330,9 @@ def main() -> int:
 
     if args.chrome_binary and not args.s:
         parser.error("-c is only used together with -s.")
+
+    if not os.path.isdir(args.output_dir):
+        parser.error(f"-O directory does not exist or is not a directory: {args.output_dir!r}")
 
     parsed = urlparse(args.url)
     if parsed.scheme not in ("http", "https"):
@@ -393,7 +404,9 @@ def main() -> int:
         for archive_url in archive_urls:
             log(f"Downloading {archive_url} ...")
             try:
-                dest_path = download_file(archive_url, progress=bar.file_progress if bar else None)
+                dest_path = download_file(
+                    archive_url, args.output_dir, progress=bar.file_progress if bar else None
+                )
             except OSError as exc:
                 if bar:
                     bar.file_finished()
@@ -402,7 +415,7 @@ def main() -> int:
                 continue
             if bar:
                 bar.file_finished()
-            log(f"  -> {dest_path}")
+            log(f"  -> {os.path.basename(dest_path)}")
             downloaded += 1
     finally:
         if bar:

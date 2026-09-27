@@ -27,7 +27,8 @@ pip install -r requirements.txt
 python3 zipgetter.py <url> [options]
 ```
 
-Matching archive files are downloaded into the current directory. When
+Matching archive files are downloaded into the current directory (or the
+directory given with `-O`). When
 stdout is an interactive terminal, an overall progress bar (files done out
 of files found) is shown on the bottom line; it is omitted when output is piped or redirected.
 
@@ -36,6 +37,8 @@ of files found) is shown on the bottom line; it is omitted when output is piped 
 | Flag | Description |
 | --- | --- |
 | `-s` | Use Selenium (headless Chromium/Brave/Chrome) instead of a plain HTTP request. |
+| `-c PATH` | Path to a Chrome/Chromium/Brave executable to use with `-s`, if not found on `PATH`. Only valid together with `-s`. |
+| `-O DIRECTORY` | Download files into `DIRECTORY` instead of the current directory. It must already exist. |
 | `-os FILE` | Save the fetched page's HTML source to `FILE`. |
 | `-oh FILE` | Save the request/response HTTP headers to `FILE`. Not available with `-s`. |
 | `-e [EXT1,EXT2,...]` | Also match other archive extensions. With no list given, matches common archive extensions (zip, rar, 7z, tar, tar.gz, tgz, tar.bz2, tar.xz, gz, bz2, xz). Default (no `-e`): `.zip` only. |
@@ -55,6 +58,9 @@ python3 zipgetter.py -e zip,rar,tar.gz https://example.com/downloads
 # Match all common archive extensions
 python3 zipgetter.py -e https://example.com/downloads
 
+# Download into an existing directory
+python3 zipgetter.py -O ~/Downloads/archives https://example.com/downloads
+
 # Also save the fetched HTML and headers for debugging
 python3 zipgetter.py -os page.html -oh headers.txt https://example.com/downloads
 ```
@@ -67,4 +73,5 @@ python3 zipgetter.py -os page.html -oh headers.txt https://example.com/downloads
 | `1` | The page could not be fetched (network error or HTTP 4xx/5xx). |
 | `2` | Command-line usage error. |
 | `3` | The page was fetched, but one or more files failed to download. |
-| `4` | Any other unexpected error (e.g. no Chrome-family browser found for `-s`). |
+| `4` | No usable Chrome-family browser found for `-s` (not on `PATH`, or the `-c` path is not an executable file). |
+| `254` | Any other unexpected error (e.g. failure writing the `-os`/`-oh` output files). |
