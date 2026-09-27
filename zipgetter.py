@@ -408,13 +408,17 @@ def main() -> int:
             print(message, file=file)
 
     downloaded = 0
+    total_size = 0
+    all_sizes_known = True
     errors = []
     try:
         for archive_url in archive_urls:
             announced = False
+            file_size = None
 
             def announce(total: int | None, archive_url: str = archive_url) -> None:
-                nonlocal announced
+                nonlocal announced, file_size
+                file_size = total
                 size = f" ({format_size(total)})" if total is not None else ""
                 log(f"Downloading {archive_url}{size} ...")
                 announced = True
@@ -440,6 +444,10 @@ def main() -> int:
                 bar.file_finished()
             log(f"  -> {os.path.basename(dest_path)}")
             downloaded += 1
+            if file_size is None:
+                all_sizes_known = False
+            else:
+                total_size += file_size
     finally:
         if bar:
             bar.finish()
@@ -449,6 +457,8 @@ def main() -> int:
     print(f"  Total links on page: {total_links}")
     print(f"  Total downloadable ({', '.join(extensions)}) links: {len(archive_urls)}")
     print(f"  Total files downloaded: {downloaded}")
+    if downloaded and all_sizes_known:
+        print(f"  Total download size: {format_size(total_size)}")
     if errors:
         print(f"  Errors: {len(errors)}")
         for error in errors:
