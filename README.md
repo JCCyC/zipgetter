@@ -75,3 +75,12 @@ python3 zipgetter.py -os page.html -oh headers.txt https://example.com/downloads
 | `3` | The page was fetched, but one or more files failed to download. |
 | `4` | No usable Chrome-family browser found for `-s` (not on `PATH`, or the `-c` path is not an executable file). |
 | `254` | Any other unexpected error (e.g. failure writing the `-os`/`-oh` output files). |
+
+## License
+
+Copyright (C) 2026 Juan Carlos Castro y Castro
+
+zipgetter is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. See [LICENSE](LICENSE) for the full text.
