@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-`zipgetter.py` is a single-file Python CLI script that downloads archive files (`.zip` by default) linked from a web page. There is no package structure, build system, test suite, or linter configured — the entire tool lives in this one file.
+`zipgetter` is a single-file Python CLI script (no `.py` extension) that downloads archive files (`.zip` by default) linked from a web page. There is no package structure, build system, test suite, or linter configured — the entire tool lives in this one file.
 
 ## Commands
 
@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 pip install -r requirements.txt
 
 # Run
-python3 zipgetter.py <url> [options]
+./zipgetter <url> [options]
 ```
 
 There are no automated tests, lint config, or build steps. Verify changes by running the script against a real or local page and checking its stdout/exit code.
@@ -40,4 +40,4 @@ Exit codes are deliberate and encoded as module-level constants (`EXIT_PAGE_INAC
 
 ## Changelog
 
-User-visible changes go under `## [Unreleased]` in `CHANGELOG.md` (Keep a Changelog format, newest release first). When releasing, rename that section to the new version and date, bump `__version__` in `zipgetter.py`, and add the version's compare link at the bottom.
+User-visible changes go under `## [Unreleased]` in `CHANGELOG.md` (Keep a Changelog format, newest release first). When releasing, rename that section to the new version and date, bump `__version__` in `zipgetter`, and add the version's compare link at the bottom.

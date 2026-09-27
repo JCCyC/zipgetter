@@ -24,7 +24,7 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python3 zipgetter.py <url> [options]
+./zipgetter <url> [options]
 ```
 
 Matching archive files are downloaded into the current directory (or the
@@ -48,22 +48,22 @@ of files found) is shown on the bottom line; it is omitted when output is piped 
 
 ```bash
 # Download all .zip files linked from a page
-python3 zipgetter.py https://example.com/downloads
+./zipgetter https://example.com/downloads
 
 # Same, but render the page with headless Chrome first (for JS-built link lists)
-python3 zipgetter.py -s https://example.com/downloads
+./zipgetter -s https://example.com/downloads
 
 # Match zip, rar, and tar.gz files
-python3 zipgetter.py -e zip,rar,tar.gz https://example.com/downloads
+./zipgetter -e zip,rar,tar.gz https://example.com/downloads
 
 # Match all common archive extensions
-python3 zipgetter.py -e https://example.com/downloads
+./zipgetter -e https://example.com/downloads
 
 # Download into an existing directory
-python3 zipgetter.py -O ~/Downloads/archives https://example.com/downloads
+./zipgetter -O ~/Downloads/archives https://example.com/downloads
 
 # Also save the fetched HTML and headers for debugging
-python3 zipgetter.py -os page.html -oh headers.txt https://example.com/downloads
+./zipgetter -os page.html -oh headers.txt https://example.com/downloads
 ```
 
 ## Exit codes

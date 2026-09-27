@@ -34,7 +34,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Files downloaded by zipgetter.py when run from the repo root
+# Files downloaded by zipgetter when run from the repo root
 *.zip
 *.rar
 *.7z
@@ -49,3 +49,6 @@ Thumbs.db
 
 # Debug output saved via -os (HTML source dumps)
 *.html
+
+# Scratch directory for manual tests
+outdir/

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The script is now named `zipgetter` instead of `zipgetter.py`.
+
 ## [0.9.0] - 2026-09-27
 
 First release.
