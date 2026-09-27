@@ -36,6 +36,7 @@ of files found) is shown on the bottom line; it is omitted when output is piped 
 
 | Flag | Description |
 | --- | --- |
+| `--version` | Print the version number and exit. |
 | `-s` | Use Selenium (headless Chromium/Brave/Chrome) instead of a plain HTTP request. |
 | `-c PATH` | Path to a Chrome/Chromium/Brave executable to use with `-s`, if not found on `PATH`. Only valid together with `-s`. |
 | `-O DIRECTORY` | Download files into `DIRECTORY` instead of the current directory. It must already exist. |

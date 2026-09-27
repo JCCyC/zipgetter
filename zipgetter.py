@@ -36,6 +36,8 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
+__version__ = "0.9.0"
+
 # Exit codes 1 and 2 line up with argparse's own default: it exits 2 on a
 # usage error, so "syntax" is 2 here too, letting us rely on argparse's
 # built-in behavior instead of overriding it.
@@ -298,6 +300,11 @@ def main() -> int:
         description="Download all .zip files linked from a web page."
     )
     parser.add_argument("url", help="An HTTP or HTTPS URL to browse.")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+    )
     parser.add_argument(
         "-s",
         action="store_true",
