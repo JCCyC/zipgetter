@@ -24,12 +24,17 @@ scripts/build-deb -S [REF]
 
 There are no automated tests or lint config. Verify changes by running the script against a real or local page and checking its stdout/exit code.
 
+To test on other distro releases, run the script in Docker (e.g. `ubuntu:24.04`, `ubuntu:26.04`, `linuxmintd/mint22.3-amd64`) with the repo mounted read-only, serving a local test page with `python3 -m http.server`. For `-s`:
+
+- Install packages with `--no-install-recommends`. Otherwise `python3-selenium` pulls in Ubuntu's `chromium-browser`/`chromium-chromedriver` transitional debs, which are snap stubs that can't run without snapd, and `find_chrome_binary` picks the stub.
+- Ubuntu has no working Chromium deb. Use Google Chrome's .deb plus the matching Chrome for Testing chromedriver, or use a Linux Mint image, whose `chromium` package is a real deb that ships `/usr/bin/chromedriver`.
+
 ## Architecture
 
 The script has two independent page-fetching backends, selected by the `-s` flag:
 
 - `get_page_html_requests` — default path. Fetches with `requests`, returns HTML plus request/response headers and status code so they can be inspected or saved (`-oh`/`-os`) even on HTTP errors.
-- `get_page_html_selenium` — used with `-s`. Drives a headless Chromium/Brave/Chrome via Selenium (found on `PATH` by `find_chrome_binary`) for pages that build links via JavaScript. Exposes no raw HTTP headers, so `-oh` is rejected in combination with `-s`. It warns on stderr (without failing) when `selenium.__version__` is older than `MIN_SELENIUM_VERSION`, which must match the `selenium>=` floor in `requirements.txt`.
+- `get_page_html_selenium` — used with `-s`. Drives a headless Chromium/Brave/Chrome via Selenium (found on `PATH` by `find_chrome_binary`) for pages that build links via JavaScript. Exposes no raw HTTP headers, so `-oh` is rejected in combination with `-s`. It warns on stderr (without failing) when `selenium.__version__` is older than `MIN_SELENIUM_VERSION`, which must match the `selenium>=` floor in `requirements.txt`. Selenium is imported lazily inside this function, so `main()` maps any `ModuleNotFoundError` from the fetch to `EXIT_SELENIUM_NOT_INSTALLED`. If `webdriver.Chrome` raises `NoSuchDriverException`, it retries with `Service(shutil.which("chromedriver"))`: distro packages like Debian/Ubuntu `python3-selenium` strip the Selenium Manager binary that normally finds the driver, so without this fallback `-s` never works with them. Keep Selenium's own lookup first so pip installs can still fetch a chromedriver matching the browser.
 
 Both backends feed into a common pipeline in `main()`:
 

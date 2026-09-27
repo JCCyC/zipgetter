@@ -27,6 +27,10 @@ older Selenium, such as the python3-selenium package on some older
 distribution releases, zipgetter prints a warning to standard error and
 carries on, but rendering may fail or misbehave with current browsers and
 chromedriver. No warning is printed without \fB\-s\fR.
+.PP
+Distribution Selenium packages such as python3-selenium cannot download a
+chromedriver by themselves, so with them a chromedriver matching the browser
+must be on \fBPATH\fR. A pip-installed Selenium fetches one when needed.
 
 [SEE ALSO]
 https://github.com/JCCyC/zipgetter

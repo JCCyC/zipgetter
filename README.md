@@ -36,7 +36,9 @@ sudo apt install ./build/deb/zipgetter_*_all.deb
 
 This installs `zipgetter` into `/usr/bin` along with a man page. Selenium
 mode (`-s`) additionally needs `python3-selenium`, a Chrome-family browser,
-and a matching chromedriver. Note that `python3-selenium` on older releases
+and a matching chromedriver on `PATH` (the distro's Selenium can't download
+one by itself; on Debian and Linux Mint it comes with the `chromium-driver`
+or `chromium` package). Note that `python3-selenium` on older releases
 (e.g. Ubuntu 22.04, which ships a 4.0.0 alpha) is too old to work well and
 triggers a warning in `-s` mode; install a newer Selenium with `pip` instead.
 
