@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- In Selenium mode (`-s`), a warning on stderr when the installed Selenium is older than 4.18 (such as the 4.0.0 alpha in Ubuntu 22.04's `python3-selenium`), which handles current browsers poorly.
+
 ### Changed
 
+- The minimum Selenium version in `requirements.txt` is lowered from 4.20 to 4.18, so Ubuntu 24.04's `python3-selenium` (4.18.1) qualifies.
 - `--version` now prints copyright, license and author information, which also adds COPYRIGHT and AUTHOR sections to the man page.
 
 ## [0.9.1] - 2026-09-27

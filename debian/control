@@ -34,4 +34,5 @@ Description: download archive files linked from a web page
  Pages that build their link lists with JavaScript can be rendered first
  with a headless Chromium, Brave or Google Chrome driven by Selenium. That
  mode needs the suggested python3-selenium package, a Chrome-family browser
- and a matching chromedriver.
+ and a matching chromedriver. Selenium versions older than 4.18 trigger a
+ warning in that mode.

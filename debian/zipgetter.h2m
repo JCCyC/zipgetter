@@ -18,5 +18,12 @@ No usable Chrome-family browser found for \fB\-s\fR (not on \fBPATH\fR, or the \
 .B 254
 Any other unexpected error (e.g. failure writing the \fB\-os\fR/\fB\-oh\fR output files).
 
+[NOTES]
+Selenium mode (\fB\-s\fR) works best with Selenium 4.18 or newer. With an
+older Selenium, such as the python3-selenium package on some older
+distribution releases, zipgetter prints a warning to standard error and
+carries on, but rendering may fail or misbehave with current browsers and
+chromedriver. No warning is printed without \fB\-s\fR.
+
 [SEE ALSO]
 https://github.com/JCCyC/zipgetter

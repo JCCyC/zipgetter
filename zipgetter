@@ -27,6 +27,7 @@ match other archive extensions.
 
 import argparse
 import os
+import re
 import shutil
 import sys
 import time
@@ -65,6 +66,11 @@ CHROME_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
 )
+
+# Selenium releases older than this (e.g. the 4.0.0 alpha that Ubuntu 22.04
+# ships as python3-selenium) handle modern headless Chrome and chromedriver
+# poorly. Keep in sync with requirements.txt.
+MIN_SELENIUM_VERSION = (4, 18)
 
 # Used when -e is given with no extensions list.
 POPULAR_ARCHIVE_EXTENSIONS = ["zip", "rar", "7z", "tar", "tar.gz", "tgz", "tar.bz2", "tar.xz", "gz", "bz2", "xz"]
@@ -122,6 +128,22 @@ def get_page_html_requests(url: str) -> tuple[str, dict[str, str], dict[str, str
     return response.text, dict(response.request.headers), dict(response.headers), response.status_code
 
 
+def warn_if_old_selenium(version: str) -> None:
+    """Print a warning to stderr if a Selenium version is older than MIN_SELENIUM_VERSION.
+
+    Only the leading major.minor numbers are compared, so pre-release suffixes
+    (e.g. '4.0.0.a1') are ignored. Unparseable versions are not warned about.
+    """
+    match = re.match(r"(\d+)\.(\d+)", version)
+    if match and tuple(map(int, match.groups())) < MIN_SELENIUM_VERSION:
+        minimum = ".".join(map(str, MIN_SELENIUM_VERSION))
+        print(
+            f"Warning: Selenium {version} is older than {minimum} and may not work "
+            f"well with current browsers; consider pip install 'selenium>={minimum}'.",
+            file=sys.stderr,
+        )
+
+
 def get_page_html_selenium(url: str, chrome_binary: str | None = None) -> str:
     """Fetch a page's HTML using a headless Selenium-driven browser.
 
@@ -130,8 +152,11 @@ def get_page_html_selenium(url: str, chrome_binary: str | None = None) -> str:
         chrome_binary: Path to a Chrome/Chromium/Brave executable to use
             instead of searching PATH.
     """
+    import selenium
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
+
+    warn_if_old_selenium(selenium.__version__)
 
     options = Options()
     options.binary_location = find_chrome_binary(chrome_binary)

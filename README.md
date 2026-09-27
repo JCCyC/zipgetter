@@ -11,7 +11,9 @@ rendered with a headless, Selenium-driven browser.
 - Python 3.10+
 - The packages in `requirements.txt`
 - For `-s` (Selenium mode) only: a Chromium, Brave, or Google Chrome binary
-  on `PATH`
+  on `PATH`, and Selenium 4.18 or newer. Older Selenium versions still run,
+  but zipgetter prints a warning to stderr since they handle current
+  browsers and chromedriver poorly.
 
 ## Installation
 
@@ -33,7 +35,9 @@ sudo apt install ./build/deb/zipgetter_*_all.deb
 
 This installs `zipgetter` into `/usr/bin` along with a man page. Selenium
 mode (`-s`) additionally needs `python3-selenium`, a Chrome-family browser,
-and a matching chromedriver.
+and a matching chromedriver. Note that `python3-selenium` on older releases
+(e.g. Ubuntu 22.04, which ships a 4.0.0 alpha) is too old to work well and
+triggers a warning in `-s` mode; install a newer Selenium with `pip` instead.
 
 ## Usage
 

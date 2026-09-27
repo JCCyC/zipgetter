@@ -29,7 +29,7 @@ There are no automated tests or lint config. Verify changes by running the scrip
 The script has two independent page-fetching backends, selected by the `-s` flag:
 
 - `get_page_html_requests` — default path. Fetches with `requests`, returns HTML plus request/response headers and status code so they can be inspected or saved (`-oh`/`-os`) even on HTTP errors.
-- `get_page_html_selenium` — used with `-s`. Drives a headless Chromium/Brave/Chrome via Selenium (found on `PATH` by `find_chrome_binary`) for pages that build links via JavaScript. Exposes no raw HTTP headers, so `-oh` is rejected in combination with `-s`.
+- `get_page_html_selenium` — used with `-s`. Drives a headless Chromium/Brave/Chrome via Selenium (found on `PATH` by `find_chrome_binary`) for pages that build links via JavaScript. Exposes no raw HTTP headers, so `-oh` is rejected in combination with `-s`. It warns on stderr (without failing) when `selenium.__version__` is older than `MIN_SELENIUM_VERSION`, which must match the `selenium>=` floor in `requirements.txt`.
 
 Both backends feed into a common pipeline in `main()`:
 
