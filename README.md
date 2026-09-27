@@ -11,9 +11,10 @@ rendered with a headless, Selenium-driven browser.
 - Python 3.10+
 - The packages in `requirements.txt`
 - For `-s` (Selenium mode) only: a Chromium, Brave, or Google Chrome binary
-  on `PATH`, and Selenium 4.18 or newer. Older Selenium versions still run,
-  but zipgetter prints a warning to stderr since they handle current
-  browsers and chromedriver poorly.
+  on `PATH`, a matching chromedriver (on `PATH`, or fetched automatically by
+  a pip-installed Selenium), and Selenium 4.18 or newer. Older Selenium
+  versions still run, but zipgetter prints a warning to stderr since they
+  handle current browsers and chromedriver poorly.
 
 ## Installation
 
@@ -60,7 +61,7 @@ of files found) is shown on the bottom line; it is omitted when output is piped 
 | `-O DIRECTORY` | Download files into `DIRECTORY` instead of the current directory. It must already exist. |
 | `-os FILE` | Save the fetched page's HTML source to `FILE`. |
 | `-oh FILE` | Save the request/response HTTP headers to `FILE`. Not available with `-s`. |
-| `-e [EXT1,EXT2,...]` | Also match other archive extensions. With no list given, matches common archive extensions (zip, rar, 7z, tar, tar.gz, tgz, tar.bz2, tar.xz, gz, bz2, xz). Default (no `-e`): `.zip` only. |
+| `-e EXT1,EXT2,...` | Match these archive extensions instead of `.zip`. The keyword `common` stands for common archive extensions (zip, rar, 7z, tar, tar.gz, tgz, tar.bz2, tar.xz, gz, bz2, xz) and can be combined with others, as in `-e common,iso`. Default (no `-e`): `.zip` only. |
 
 ### Examples
 
@@ -75,7 +76,7 @@ of files found) is shown on the bottom line; it is omitted when output is piped 
 ./zipgetter -e zip,rar,tar.gz https://example.com/downloads
 
 # Match all common archive extensions
-./zipgetter -e https://example.com/downloads
+./zipgetter -e common https://example.com/downloads
 
 # Download into an existing directory
 ./zipgetter -O ~/Downloads/archives https://example.com/downloads
@@ -93,6 +94,7 @@ of files found) is shown on the bottom line; it is omitted when output is piped 
 | `2` | Command-line usage error. |
 | `3` | The page was fetched, but one or more files failed to download. |
 | `4` | No usable Chrome-family browser found for `-s` (not on `PATH`, or the `-c` path is not an executable file). |
+| `5` | `-s` was given, but Selenium is not installed (or is missing one of its own dependencies). |
 | `254` | Any other unexpected error (e.g. failure writing the `-os`/`-oh` output files). |
 
 ## License

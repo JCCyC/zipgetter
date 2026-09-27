@@ -10,11 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - In Selenium mode (`-s`), a warning on stderr when the installed Selenium is older than 4.18 (such as the 4.0.0 alpha in Ubuntu 22.04's `python3-selenium`), which handles current browsers poorly.
+- Exit code 5 when `-s` is given but Selenium is not installed (or is missing one of its own dependencies). This used to exit 1, as if the page were unreachable.
+- `-e common` selects the common archive extensions, and `common` can be combined with other extensions, as in `-e common,iso`.
 
 ### Changed
 
 - The minimum Selenium version in `requirements.txt` is lowered from 4.20 to 4.18, so Ubuntu 24.04's `python3-selenium` (4.18.1) qualifies.
+- **Breaking:** `-e` now requires an extensions list. A bare `-e` used to select the common archive extensions, but when followed by the URL it took the URL as its list; use `-e common` instead.
 - `--version` now prints copyright, license and author information, which also adds COPYRIGHT and AUTHOR sections to the man page.
+
+### Fixed
+
+- `-s` now works with distro Selenium packages such as Debian/Ubuntu's `python3-selenium`, which lack the Selenium Manager helper that normally locates chromedriver. When Selenium can't find a driver, zipgetter falls back to the `chromedriver` on `PATH`.
 
 ## [0.9.1] - 2026-09-27
 

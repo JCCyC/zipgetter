@@ -15,6 +15,9 @@ The page was fetched, but one or more files failed to download.
 .B 4
 No usable Chrome-family browser found for \fB\-s\fR (not on \fBPATH\fR, or the \fB\-c\fR path is not an executable file).
 .TP
+.B 5
+\fB\-s\fR was given, but Selenium is not installed (or is missing one of its own dependencies).
+.TP
 .B 254
 Any other unexpected error (e.g. failure writing the \fB\-os\fR/\fB\-oh\fR output files).
 
