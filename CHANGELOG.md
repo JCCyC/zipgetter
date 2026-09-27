@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `--version` now prints copyright, license and author information, which also adds COPYRIGHT and AUTHOR sections to the man page.
+
 ## [0.9.1] - 2026-09-27
 
 ### Added

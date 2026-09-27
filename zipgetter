@@ -38,6 +38,17 @@ from bs4 import BeautifulSoup
 
 __version__ = "0.9.1"
 
+# GNU-style --version text; help2man turns the Copyright and "Written by"
+# lines into the man page's COPYRIGHT and AUTHOR sections.
+VERSION_TEXT = f"""\
+%(prog)s {__version__}
+Copyright (C) 2026 Juan Carlos Castro y Castro
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Juan Carlos Castro y Castro."""
+
 # Exit codes 1 and 2 line up with argparse's own default: it exits 2 on a
 # usage error, so "syntax" is 2 here too, letting us rely on argparse's
 # built-in behavior instead of overriding it.
@@ -296,14 +307,17 @@ def download_file(
 
 
 def main() -> int:
+    # RawDescriptionHelpFormatter keeps VERSION_TEXT's line breaks, which the
+    # default formatter would rewrap into a single paragraph.
     parser = argparse.ArgumentParser(
-        description="Download all .zip files linked from a web page."
+        description="Download all .zip files linked from a web page.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("url", help="An HTTP or HTTPS URL to browse.")
     parser.add_argument(
         "--version",
         action="version",
-        version=f"%(prog)s {__version__}",
+        version=VERSION_TEXT,
     )
     parser.add_argument(
         "-s",
