@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-27
+
 ### Added
 
 - In Selenium mode (`-s`), a warning on stderr when the installed Selenium is older than 4.18 (such as the 4.0.0 alpha in Ubuntu 22.04's `python3-selenium`), which handles current browsers poorly.
@@ -49,6 +51,7 @@ First release.
 - File sizes in the "Downloading" messages and the total download size in the final stats, when the server provides them.
 - Distinct exit codes for an unreachable page, usage errors, failed downloads and a missing Chrome binary.
 
-[Unreleased]: https://github.com/JCCyC/zipgetter/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/JCCyC/zipgetter/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/JCCyC/zipgetter/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/JCCyC/zipgetter/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/JCCyC/zipgetter/releases/tag/v0.9.0

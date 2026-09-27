@@ -1,3 +1,17 @@
+zipgetter (0.10.0-1) jammy; urgency=medium
+
+  * New upstream release.
+  * Breaking: -e now requires an extensions list; use -e common for the
+    common archive extensions, optionally combined with others
+    (-e common,iso).
+  * -s now falls back to the chromedriver on PATH when Selenium can't find
+    a driver, so it works with the python3-selenium package.
+  * -s warns when the installed Selenium is older than 4.18.
+  * New exit code 5 when -s is given but Selenium is not installed.
+  * --version now prints copyright, license and author information.
+
+ -- Juan Carlos Castro y Castro <jccyc1965@gmail.com>  Sun, 27 Sep 2026 10:04:51 -0300
+
 zipgetter (0.9.1-1) jammy; urgency=medium
 
   * Initial Debian packaging, including a man page.

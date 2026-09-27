@@ -37,7 +37,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-__version__ = "0.9.1"
+__version__ = "0.10.0"
 
 # GNU-style --version text; help2man turns the Copyright and "Written by"
 # lines into the man page's COPYRIGHT and AUTHOR sections.
