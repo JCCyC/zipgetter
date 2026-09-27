@@ -37,3 +37,7 @@ All HTTP requests (page fetch and downloads) send a spoofed Chrome `User-Agent` 
 ### Exit codes
 
 Exit codes are deliberate and encoded as module-level constants (`EXIT_PAGE_INACCESSIBLE = 1`, `EXIT_SYNTAX_ERROR = 2`, `EXIT_DOWNLOAD_ERROR = 3`, `EXIT_CHROME_NOT_FOUND = 4`, `EXIT_OTHER_ERROR = 254`). Code 2 is reserved to line up with argparse's own default usage-error exit code rather than being explicitly returned. `EXIT_OTHER_ERROR` is kept at the high end of the range (254) specifically so new, more specific exit codes (like `EXIT_CHROME_NOT_FOUND`) can keep claiming small numbers without colliding with it. Preserve this scheme when modifying error handling — callers of the script may depend on distinguishing "page unreachable" from "some downloads failed" from "bad arguments" from "no usable Chrome binary."
+
+## Changelog
+
+User-visible changes go under `## [Unreleased]` in `CHANGELOG.md` (Keep a Changelog format, newest release first). When releasing, rename that section to the new version and date, bump `__version__` in `zipgetter.py`, and add the version's compare link at the bottom.
