@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+# The script is not a Python package, so there is nothing for pybuild to do;
+# just generate the man page from --help. COLUMNS keeps argparse from wrapping
+# the usage line, which help2man would otherwise mangle. The script imports
+# requests and bs4 at startup, hence their presence in Build-Depends.
+override_dh_auto_build:
+	COLUMNS=1000 help2man --no-info --no-discard-stderr \
+		--name="download archive files linked from a web page" \
+		--include=debian/zipgetter.h2m \
+		--output=debian/zipgetter.1 ./zipgetter

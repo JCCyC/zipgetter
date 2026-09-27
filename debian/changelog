@@ -1,0 +1,5 @@
+zipgetter (0.9.1-1) UNRELEASED; urgency=medium
+
+  * Initial Debian packaging.
+
+ -- Juan Carlos Castro y Castro <jccyc1965@gmail.com>  Sun, 27 Sep 2026 07:38:30 -0300

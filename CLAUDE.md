@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-`zipgetter` is a single-file Python CLI script (no `.py` extension) that downloads archive files (`.zip` by default) linked from a web page. There is no package structure, build system, test suite, or linter configured — the entire tool lives in this one file.
+`zipgetter` is a single-file Python CLI script (no `.py` extension) that downloads archive files (`.zip` by default) linked from a web page. There is no Python package structure, test suite, or linter configured — the entire tool lives in this one file. The only build step is the Debian packaging in `debian/` (see below).
 
 ## Commands
 
@@ -14,9 +14,15 @@ pip install -r requirements.txt
 
 # Run
 ./zipgetter <url> [options]
+
+# Build a local .deb (into build/deb/) from committed content at HEAD or a ref
+scripts/build-deb [REF]
+
+# Build a signed source package for a Launchpad PPA upload
+scripts/build-deb -S [REF]
 ```
 
-There are no automated tests, lint config, or build steps. Verify changes by running the script against a real or local page and checking its stdout/exit code.
+There are no automated tests or lint config. Verify changes by running the script against a real or local page and checking its stdout/exit code.
 
 ## Architecture
 
@@ -41,3 +47,9 @@ Exit codes are deliberate and encoded as module-level constants (`EXIT_PAGE_INAC
 ## Changelog
 
 User-visible changes go under `## [Unreleased]` in `CHANGELOG.md` (Keep a Changelog format, newest release first). When releasing, rename that section to the new version and date, bump `__version__` in `zipgetter`, and add the version's compare link at the bottom.
+
+## Debian packaging
+
+`debian/` is standard debhelper (compat 13) packaging for an `Architecture: all` package targeting Ubuntu jammy (22.04, the oldest series with Python 3.10) as the first PPA series; other series are filled with Launchpad's "Copy packages" rather than separate uploads. `debian/rules` generates the man page from `--help` with help2man, plus `debian/zipgetter.h2m` for the exit-status section, so keep that file in sync with the exit codes. `dh_python3` rewrites the `#!/usr/bin/env python3` shebang to `/usr/bin/python3` in the installed script.
+
+`scripts/build-deb` builds from a git ref, not the working tree, using `dist/zipgetter-X.Y.Z.tar.gz` as the orig tarball when it exists so the PPA gets byte-for-byte the tarball from the GitHub release. The upstream version comes from `debian/changelog`, whose top entry must match `__version__` at release time. When a runtime dependency changes in `requirements.txt`, update `Depends`/`Suggests` (and `Build-Depends` if it's imported at startup) in `debian/control`.

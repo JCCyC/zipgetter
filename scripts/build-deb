@@ -1,0 +1,73 @@
+#!/bin/sh
+# Build the zipgetter Debian package from a git ref.
+#
+# Usage: scripts/build-deb [-S] [REF]
+#
+#   REF  git ref to build (default: HEAD). Only committed content is used.
+#   -S   build a signed source package for uploading to a Launchpad PPA
+#        instead of an unsigned binary .deb for local use.
+#
+# The upstream version comes from debian/changelog at REF. The orig tarball is
+# dist/zipgetter-VERSION.tar.gz when it exists (so the PPA gets byte-for-byte
+# the tarball attached to the GitHub release), otherwise it is generated the
+# same way the release workflow does. Everything is built under build/deb/.
+#
+# Needs: sudo apt install devscripts debhelper dh-python help2man
+#        python3-bs4 python3-requests lintian (plus dput for uploading)
+
+set -eu
+
+source_only=false
+if [ "${1:-}" = "-S" ]; then
+    source_only=true
+    shift
+fi
+ref=${1:-HEAD}
+
+repo=$(git rev-parse --show-toplevel)
+cd "$repo"
+
+git rev-parse --verify --quiet "$ref^{commit}" >/dev/null || {
+    echo "build-deb: unknown git ref: $ref" >&2
+    exit 1
+}
+
+deb_version=$(git show "$ref:debian/changelog" | dpkg-parsechangelog -l - -S Version)
+distribution=$(git show "$ref:debian/changelog" | dpkg-parsechangelog -l - -S Distribution)
+version=${deb_version%-*}
+
+if $source_only && [ "$distribution" = UNRELEASED ]; then
+    echo "build-deb: debian/changelog at $ref is UNRELEASED; set a series (e.g. jammy) first" >&2
+    exit 1
+fi
+
+workdir=$repo/build/deb
+srcdir=$workdir/zipgetter-$version
+orig=$workdir/zipgetter_$version.orig.tar.gz
+rm -rf "$workdir"
+mkdir -p "$workdir"
+
+if [ -f "dist/zipgetter-$version.tar.gz" ]; then
+    cp "dist/zipgetter-$version.tar.gz" "$orig"
+else
+    echo "build-deb: dist/zipgetter-$version.tar.gz not found; generating the orig tarball from $ref" >&2
+    git archive --prefix="zipgetter-$version/" "$ref" | gzip -n -9 >"$orig"
+fi
+
+tar -xzf "$orig" -C "$workdir"
+# Take debian/ from REF, not from the orig tarball, so Debian-only revisions
+# (-2, -3, ...) can be built against an already released tarball.
+rm -rf "$srcdir/debian"
+git archive "$ref" debian | tar -x -C "$srcdir"
+
+cd "$srcdir"
+if $source_only; then
+    debuild -S
+    echo
+    echo "Source package ready. Upload with:"
+    echo "  dput ppa:<launchpad-user>/<ppa-name> $workdir/zipgetter_${deb_version}_source.changes"
+else
+    debuild -b -us -uc
+    echo
+    echo "Binary package ready: $workdir/zipgetter_${deb_version}_all.deb"
+fi

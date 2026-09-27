@@ -21,6 +21,20 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Debian package
+
+To build and install a `.deb` (on Debian, Ubuntu, or derivatives):
+
+```bash
+sudo apt install devscripts debhelper dh-python help2man python3-bs4 python3-requests lintian
+scripts/build-deb
+sudo apt install ./build/deb/zipgetter_*_all.deb
+```
+
+This installs `zipgetter` into `/usr/bin` along with a man page. Selenium
+mode (`-s`) additionally needs `python3-selenium`, a Chrome-family browser,
+and a matching chromedriver.
+
 ## Usage
 
 ```bash

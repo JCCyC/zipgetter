@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Debian packaging (`debian/`) and `scripts/build-deb`, to build a `.deb` or a source package for an Ubuntu PPA. The package includes a man page.
+
 ### Changed
 
 - The script is now named `zipgetter` instead of `zipgetter.py`.

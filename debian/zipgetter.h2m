@@ -1,0 +1,22 @@
+[EXIT STATUS]
+.TP
+.B 0
+Success, all matching files downloaded.
+.TP
+.B 1
+The page could not be fetched (network error or HTTP 4xx/5xx).
+.TP
+.B 2
+Command-line usage error.
+.TP
+.B 3
+The page was fetched, but one or more files failed to download.
+.TP
+.B 4
+No usable Chrome-family browser found for \fB\-s\fR (not on \fBPATH\fR, or the \fB\-c\fR path is not an executable file).
+.TP
+.B 254
+Any other unexpected error (e.g. failure writing the \fB\-os\fR/\fB\-oh\fR output files).
+
+[SEE ALSO]
+https://github.com/JCCyC/zipgetter
