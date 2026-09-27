@@ -27,7 +27,9 @@ pip install -r requirements.txt
 python3 zipgetter.py <url> [options]
 ```
 
-Matching archive files are downloaded into the current directory.
+Matching archive files are downloaded into the current directory. When
+stdout is an interactive terminal, an overall progress bar (files done out
+of files found) is shown on the bottom line; it is omitted when output is piped or redirected.
 
 ### Options
 

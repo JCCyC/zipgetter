@@ -13,6 +13,8 @@ import argparse
 import os
 import shutil
 import sys
+import time
+from collections.abc import Callable
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -142,15 +144,127 @@ def find_archive_links(html: str, base_url: str, extensions: list[str]) -> tuple
     return len(links), archive_urls
 
 
-def download_file(url: str, dest_dir: str = ".") -> str:
-    """Download a file to dest_dir, returning the local file path."""
+def stdout_is_terminal() -> bool:
+    """Return True if stdout is an interactive terminal able to redraw a line."""
+    return sys.stdout.isatty() and os.environ.get("TERM", "") != "dumb"
+
+
+def format_size(num_bytes: float) -> str:
+    """Format a byte count as a short human-readable string, e.g. '12.3 MiB'."""
+    for unit in ("B", "KiB", "MiB", "GiB"):
+        if num_bytes < 1024 or unit == "GiB":
+            return f"{num_bytes:.0f} {unit}" if unit == "B" else f"{num_bytes:.1f} {unit}"
+        num_bytes /= 1024
+    return f"{num_bytes:.1f} GiB"
+
+
+class ProgressBar:
+    """An overall progress bar kept on the terminal's bottom line.
+
+    Tracks progress across all files: each finished file (downloaded or
+    failed) counts as one step, and the file currently downloading counts
+    fractionally by bytes when its size is known. Log lines are printed
+    above the bar via log(), which clears and redraws it.
+
+    Only meant to be used when stdout_is_terminal() is True, since it redraws
+    the line with carriage returns.
+    """
+
+    MIN_REDRAW_INTERVAL = 0.1  # seconds
+
+    def __init__(self, total_files: int) -> None:
+        self.total_files = total_files
+        self.files_done = 0
+        self._file_bytes = 0
+        self._file_total: int | None = None
+        self._drawn = False
+        self._last_draw = 0.0
+
+    def file_progress(self, done: int, total: int | None, force: bool = False) -> None:
+        """Record byte progress of the current file (a download_file callback)."""
+        self._file_bytes = done
+        self._file_total = total
+        self._draw(force)
+
+    def file_finished(self) -> None:
+        """Count the current file as done, whether it succeeded or failed."""
+        self.files_done += 1
+        self._file_bytes = 0
+        self._file_total = None
+        self._draw(force=True)
+
+    def log(self, message: str, file=None) -> None:
+        """Print a message above the bar, then redraw the bar."""
+        self._clear()
+        print(message, file=file or sys.stdout, flush=True)
+        self._draw(force=True)
+
+    def finish(self) -> None:
+        """Remove the bar so subsequent output starts on a clean line."""
+        self._clear()
+
+    def _clear(self) -> None:
+        if self._drawn:
+            columns = shutil.get_terminal_size().columns
+            sys.stdout.write("\r" + " " * (columns - 1) + "\r")
+            sys.stdout.flush()
+            self._drawn = False
+
+    def _draw(self, force: bool = False) -> None:
+        now = time.monotonic()
+        if not force and now - self._last_draw < self.MIN_REDRAW_INTERVAL:
+            return
+        self._last_draw = now
+
+        current = 0.0
+        if self._file_total:
+            current = min(self._file_bytes / self._file_total, 1.0)
+        fraction = min((self.files_done + current) / max(self.total_files, 1), 1.0)
+
+        columns = shutil.get_terminal_size().columns
+        suffix = f" {fraction * 100:3.0f}% {self.files_done}/{self.total_files} files"
+        if self._file_bytes and self.files_done < self.total_files:
+            suffix += f" ({format_size(self._file_bytes)})"
+        bar_width = max(columns - len(suffix) - 3, 10)
+        filled = int(bar_width * fraction)
+        line = f"[{'#' * filled}{'.' * (bar_width - filled)}]{suffix}"
+        sys.stdout.write("\r" + line[: columns - 1].ljust(columns - 1))
+        sys.stdout.flush()
+        self._drawn = True
+
+
+def download_file(
+    url: str,
+    dest_dir: str = ".",
+    progress: Callable[..., None] | None = None,
+) -> str:
+    """Download a file to dest_dir, returning the local file path.
+
+    If given, progress is called as progress(bytes_done, total_bytes) after
+    each chunk, and once more with force=True at the end; total_bytes is None
+    when the size isn't known up front.
+    """
     filename = os.path.basename(urlparse(url).path)
     dest_path = os.path.join(dest_dir, filename)
     response = requests.get(url, timeout=30, headers={"User-Agent": CHROME_USER_AGENT}, stream=True)
     response.raise_for_status()
+    # With a Content-Encoding, Content-Length is the compressed size, while
+    # iter_content yields decoded bytes, so the total wouldn't be comparable.
+    total = None
+    if "Content-Encoding" not in response.headers:
+        try:
+            total = int(response.headers["Content-Length"])
+        except (KeyError, ValueError):
+            pass
+    done = 0
     with open(dest_path, "wb") as f:
         for chunk in response.iter_content(chunk_size=65536):
             f.write(chunk)
+            done += len(chunk)
+            if progress:
+                progress(done, total)
+    if progress:
+        progress(done, total, force=True)
     return dest_path
 
 
@@ -265,17 +379,34 @@ def main() -> int:
 
     total_links, archive_urls = find_archive_links(html, args.url, extensions)
 
+    bar = ProgressBar(len(archive_urls)) if stdout_is_terminal() and archive_urls else None
+
+    def log(message: str, file=None) -> None:
+        if bar:
+            bar.log(message, file=file)
+        else:
+            print(message, file=file)
+
     downloaded = 0
     errors = []
-    for archive_url in archive_urls:
-        print(f"Downloading {archive_url} ...")
-        try:
-            dest_path = download_file(archive_url)
-            print(f"  -> {dest_path}")
+    try:
+        for archive_url in archive_urls:
+            log(f"Downloading {archive_url} ...")
+            try:
+                dest_path = download_file(archive_url, progress=bar.file_progress if bar else None)
+            except OSError as exc:
+                if bar:
+                    bar.file_finished()
+                log(f"  Error downloading {archive_url}: {exc}", file=sys.stderr)
+                errors.append(f"{archive_url}: {exc}")
+                continue
+            if bar:
+                bar.file_finished()
+            log(f"  -> {dest_path}")
             downloaded += 1
-        except OSError as exc:
-            print(f"  Error downloading {archive_url}: {exc}", file=sys.stderr)
-            errors.append(f"{archive_url}: {exc}")
+    finally:
+        if bar:
+            bar.finish()
 
     print()
     print("Stats:")

@@ -30,7 +30,7 @@ Both backends feed into a common pipeline in `main()`:
 1. Fetch HTML via one of the two backends above.
 2. `find_archive_links` parses the HTML with BeautifulSoup, resolves `<a href>` values against the page URL with `urljoin`, and filters by extension suffix (`.zip` by default, or the set from `-e`).
 3. `download_file` streams each matched URL to a file in the current directory, named from the URL's basename.
-4. `main()` prints per-file download progress and a final stats summary (total links seen, matching links found, files downloaded, errors).
+4. `main()` prints per-file download progress (plus an overall in-place `ProgressBar` across all files, only when `stdout_is_terminal()`) and a final stats summary (total links seen, matching links found, files downloaded, errors).
 
 All HTTP requests (page fetch and downloads) send a spoofed Chrome `User-Agent` (`CHROME_USER_AGENT`) since some servers alter behavior for the default `requests`/`urllib` UA. This does not apply in Selenium mode, which already drives a real browser.
 
