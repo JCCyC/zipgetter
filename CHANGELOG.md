@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-11
+
 ### Changed
 
 - Downloaded file names are now percent-decoded, so `My%20File%20(2026).zip` is saved as `My File (2026).zip`. Slashes and NUL bytes that decoding would produce are replaced with `_`.
@@ -55,7 +57,8 @@ First release.
 - File sizes in the "Downloading" messages and the total download size in the final stats, when the server provides them.
 - Distinct exit codes for an unreachable page, usage errors, failed downloads and a missing Chrome binary.
 
-[Unreleased]: https://github.com/JCCyC/zipgetter/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/JCCyC/zipgetter/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/JCCyC/zipgetter/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/JCCyC/zipgetter/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/JCCyC/zipgetter/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/JCCyC/zipgetter/releases/tag/v0.9.0
