@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Downloaded file names are now percent-decoded, so `My%20File%20(2026).zip` is saved as `My File (2026).zip`. Slashes and NUL bytes that decoding would produce are replaced with `_`.
+
 ## [0.10.0] - 2026-09-27
 
 ### Added
